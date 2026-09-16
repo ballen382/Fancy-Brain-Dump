@@ -79,7 +79,7 @@ li.done .text{color:var(--muted);text-decoration:line-through}
 .pick .boxname{font-size:.78rem;color:var(--c);font-weight:600}
 .copybox{width:100%;margin-top:10px;min-height:160px;font-family:"Hanken Grotesk",system-ui,sans-serif;font-size:.85rem;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
 .note{font-size:.88rem;color:var(--muted);margin-top:8px}
-.footer{text-align:center;margin-top:28px;display:flex;justify-content:center;gap:18px}
+.footer{text-align:center;margin-top:28px;display:flex;justify-content:center;flex-wrap:wrap;gap:6px 18px}
 .edit-row{padding:12px 0;border-top:1px solid var(--line)}
 .edit-row:first-child{border-top:0}
 .edit-top{display:flex;gap:8px;align-items:center}
@@ -146,9 +146,37 @@ li{box-shadow:inset 4px 0 0 var(--c)}
 .edit-text{width:100%;font:inherit;font-family:"Fraunces",Georgia,serif;font-size:1.05rem;color:var(--ink);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:10px 12px;resize:vertical;outline:none}
 .edit-text:focus{border-color:var(--c)}
 .actions .add{margin-top:12px;padding:10px}
+
+/* Welcome */
+.welcome{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.welcome[hidden]{display:none}
+.wcard{width:100%;max-width:400px;background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);border-radius:28px;padding:22px 22px 20px;text-align:center;touch-action:pan-y}
+.wskip{display:block;margin-left:auto;border:0;background:none;color:var(--muted);font:inherit;font-size:.95rem;padding:8px 4px;cursor:pointer}
+.wart{width:132px;height:132px;margin:6px auto 18px;border-radius:36px;display:grid;place-items:center;font-size:4rem;background:linear-gradient(135deg,color-mix(in srgb,var(--c5) 35%,transparent),color-mix(in srgb,var(--c3) 35%,transparent))}
+.wcard h2{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.9rem;line-height:1.1;margin:0 0 10px;background:linear-gradient(110deg,var(--grad-a),var(--grad-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.wtext{font-size:1.15rem;line-height:1.45;margin:0 auto;max-width:300px;min-height:3.2em}
+.wtip{margin-top:12px;font-size:.92rem;color:var(--muted)}
+.wdots{display:flex;justify-content:center;gap:8px;margin:20px 0 16px}
+.wdot{width:9px;height:9px;border-radius:50%;background:var(--line);transition:width .2s}
+.wdot.on{width:26px;border-radius:9px;background:var(--grad-b)}
+.wnext{width:100%;border:0;border-radius:16px;padding:15px;font:inherit;font-weight:600;font-size:1.1rem;color:var(--accent-ink);background:linear-gradient(120deg,var(--grad-a),var(--grad-b));cursor:pointer}
+@media (prefers-reduced-motion: no-preference){.wbody.in{animation:wslide .28s ease}@keyframes wslide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}}
 </style>
 </head>
 <body>
+<div class="welcome" id="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
+  <div class="wcard" id="wcard">
+    <button class="wskip" id="wSkip">Skip</button>
+    <div class="wbody" id="wBody">
+      <div class="wart" id="wArt" aria-hidden="true"></div>
+      <h2 id="wTitle"></h2>
+      <p class="wtext" id="wText"></p>
+      <p class="wtip" id="wTip"></p>
+    </div>
+    <div class="wdots" id="wDots" aria-hidden="true"></div>
+    <button class="wnext" id="wNext">Next</button>
+  </div>
+</div>
 <div class="wrap">
   <h1>Fancy Brain Dump</h1>
   <p class="sub">Set it down here and get back to what you were doing.</p>
@@ -188,7 +216,7 @@ li{box-shadow:inset 4px 0 0 var(--c)}
     <div class="box-head"><h2 id="boxTitle"></h2><button class="toggle" id="toggleDone"></button></div>
     <ul id="list"></ul>
   </section>
-  <div class="footer"><button class="toggle" id="editBoxesLink">Edit boxes</button><button class="toggle" id="backupLink">Back up or restore</button></div>
+  <div class="footer"><button class="toggle" id="howLink">How it works</button><button class="toggle" id="editBoxesLink">Edit boxes</button><button class="toggle" id="backupLink">Back up or restore</button></div>
   <section class="panel" id="editPanel" hidden>
     <h3>Edit boxes</h3>
     <div class="note">Rename, recolor, reorder, or add boxes. A box has to be empty before you can remove it.</div>
@@ -555,6 +583,35 @@ $("saveBoxesBtn").onclick=async()=>{
   BOXES=clean;fixSelection();await saveBoxes();
   $("editPanel").hidden=true;renderCapture();render();setStatus("Boxes saved.");
 };
+
+/* First-time welcome */
+const WELCOME=[
+  {art:"🧠",title:"Dump it here",text:"Random thought? Type it, tap a box, and get back to your day.",tip:""},
+  {art:"🗂️",title:"Boxes keep it tidy",text:"Each box is one part of your life. Only open the one you need.",tip:"Rename them anytime in Edit boxes."},
+  {art:"✨",title:"Pick when you're ready",text:"Got a few minutes? Tap What fits right now.",tip:"Tap Back up once a week so nothing gets lost."}
+];
+let wStep=0;
+function drawWelcome(){
+  const c=WELCOME[wStep];
+  $("wArt").textContent=c.art;$("wTitle").textContent=c.title;$("wText").textContent=c.text;
+  $("wTip").textContent=c.tip;$("wTip").hidden=!c.tip;
+  $("wDots").innerHTML=WELCOME.map((_,n)=>`<span class="wdot${n===wStep?" on":""}"></span>`).join("");
+  $("wNext").textContent=wStep===WELCOME.length-1?"Let's go":"Next";
+  $("wSkip").hidden=wStep===WELCOME.length-1;
+  const b=$("wBody");b.classList.remove("in");void b.offsetWidth;b.classList.add("in");
+}
+function openWelcome(){wStep=0;drawWelcome();$("welcome").hidden=false;$("wNext").focus()}
+function closeWelcome(){$("welcome").hidden=true;pref("fbd-welcomed","1");$("text").focus()}
+function stepWelcome(d){const n=wStep+d;if(n<0)return;if(n>=WELCOME.length){closeWelcome();return}wStep=n;drawWelcome()}
+$("wNext").onclick=()=>stepWelcome(1);
+$("wSkip").onclick=closeWelcome;
+$("howLink").onclick=openWelcome;
+(()=>{let x0=null;const card=$("wcard");
+  card.addEventListener("touchstart",e=>{x0=e.touches[0].clientX},{passive:true});
+  card.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50)stepWelcome(dx<0?1:-1)});
+  document.addEventListener("keydown",e=>{if($("welcome").hidden)return;if(e.key==="Escape")closeWelcome();if(e.key==="ArrowRight")stepWelcome(1);if(e.key==="ArrowLeft")stepWelcome(-1)});
+})();
+if(!pref("fbd-welcomed"))openWelcome();
 
 fixSelection();renderCapture();render();
 (async()=>{
