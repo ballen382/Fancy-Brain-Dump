@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Brain Dump">
+<title>Fancy Brain Dump</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EEF0; --paper:#FBF9FA; --ink:#2A2230; --muted:#7A7079; --line:#E3DCE0;
+  --soft:#ECE6E9; --accent:#2A2230; --accent-ink:#FBF9FA;
+  --c1:#5B6E8C; --c2:#6F8A76; --c3:#B07A6E; --c4:#8C7B6A; --c5:#9A6F8E; --c6:#5E8A8A; --c7:#A38650; --c8:#6B5F73;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1620; --paper:#241E2A; --ink:#EFE8EE; --muted:#A89DA7; --line:#352D3B;
+    --soft:#2E2734; --accent:#EFE8EE; --accent-ink:#1B1620;
+    --c1:#93A6C4; --c2:#9DBBA4; --c3:#D6A497; --c4:#C2B09D; --c5:#C9A0BD; --c6:#8FC0C0; --c7:#D4B77E; --c8:#B3A6BC;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1620; --paper:#241E2A; --ink:#EFE8EE; --muted:#A89DA7; --line:#352D3B;
+  --soft:#2E2734; --accent:#EFE8EE; --accent-ink:#1B1620;
+  --c1:#93A6C4; --c2:#9DBBA4; --c3:#D6A497; --c4:#C2B09D; --c5:#C9A0BD; --c6:#8FC0C0; --c7:#D4B77E; --c8:#B3A6BC;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.5}
+.wrap{max-width:600px;margin:0 auto;padding:calc(22px + env(safe-area-inset-top,0px)) 18px 70px}
+h1{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:2.4rem;letter-spacing:-.01em;margin:0;line-height:1.05}
+.sub{color:var(--muted);margin:6px 0 20px;font-size:.95rem}
+.capture{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:16px 16px 14px}
+textarea{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-family:"Fraunces",Georgia,serif;font-size:1.2rem;resize:none;min-height:58px;outline:none}
+textarea::placeholder{color:var(--muted);font-style:italic}
+.row{margin-top:12px}
+.row-label{font-size:.82rem;color:var(--muted);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:.9rem;padding:6px 13px;border-radius:999px;cursor:pointer;min-height:36px}
+.chip[aria-pressed="true"]{background:var(--c,var(--ink));border-color:var(--c,var(--ink));color:var(--paper)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.add{margin-top:16px;width:100%;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:600;font-size:1rem;padding:13px;cursor:pointer}
+.add:disabled{opacity:.35;cursor:default}
+.status{min-height:22px;font-size:.88rem;color:var(--muted);margin-top:8px;text-align:center}
+.tabs{display:flex;gap:18px;overflow-x:auto;margin:26px -18px 0;padding:0 18px;border-bottom:1px solid var(--line);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;background:none;color:var(--muted);font:inherit;font-weight:500;padding:10px 0 12px;cursor:pointer;display:flex;align-items:baseline;gap:6px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab .n{font-size:.8rem}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--c)}
+.box-head{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px}
+.box-head h2{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:1.6rem;margin:0;display:flex;align-items:center;gap:10px}
+.box-head h2::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.toggle{border:0;background:none;color:var(--muted);font:inherit;font-size:.88rem;cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+ul{list-style:none;margin:0;padding:0;background:var(--paper);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+li{padding:14px 16px;border-top:1px solid var(--line)}
+li:first-child{border-top:0}
+.main{display:flex;gap:12px;align-items:flex-start}
+.check{flex:0 0 24px;height:24px;border-radius:50%;border:1.5px solid var(--muted);background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--paper);font-size:.8rem;margin-top:2px;padding:0}
+li.done .check{background:var(--c);border-color:var(--c)}
+.body{flex:1;min-width:0}
+.text{overflow-wrap:anywhere}
+li.done .text{color:var(--muted);text-decoration:line-through}
+.tags{margin-top:3px;font-size:.82rem;color:var(--muted)}
+.more{border:0;background:none;color:var(--muted);font:inherit;font-size:1.2rem;cursor:pointer;padding:0 4px;line-height:1}
+.actions{margin:12px 0 2px 36px;padding-top:12px;border-top:1px dashed var(--line)}
+.actions .row-label{margin-bottom:6px}
+.del{margin-top:12px;border:0;background:none;color:var(--muted);font:inherit;font-size:.88rem;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.empty{padding:22px 18px;color:var(--muted);font-style:italic;font-family:"Fraunces",Georgia,serif}
+.tools{display:flex;gap:10px;margin-top:22px}
+.ghost{flex:1;border:1px solid var(--ink);background:transparent;color:var(--ink);font:inherit;font-weight:600;font-size:.95rem;padding:11px;border-radius:14px;cursor:pointer}
+.panel{margin-top:12px;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:16px}
+.panel h3{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:1.3rem;margin:0 0 4px}
+.picks{margin-top:14px;border-radius:16px}
+.pick .why{margin-top:4px;font-size:.9rem;color:var(--muted);font-style:italic}
+.pick .boxname{font-size:.78rem;color:var(--c);font-weight:600}
+.copybox{width:100%;margin-top:10px;min-height:160px;font-family:"Hanken Grotesk",system-ui,sans-serif;font-size:.85rem;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--bg)}
+.note{font-size:.88rem;color:var(--muted);margin-top:8px}
+.footer{text-align:center;margin-top:28px;display:flex;justify-content:center;gap:18px}
+.edit-row{padding:12px 0;border-top:1px solid var(--line)}
+.edit-row:first-child{border-top:0}
+.edit-top{display:flex;gap:8px;align-items:center}
+.edit-top input{flex:1;min-width:0;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.mini{border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:.85rem;border-radius:10px;padding:8px 10px;cursor:pointer}
+.mini:disabled{opacity:.3}
+.swatches{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.swatch[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 3px var(--paper)}
+#editPanel .add:disabled{opacity:.35}
+
+/* ===== Polish layer ===== */
+:root{--glass:rgba(255,255,255,.62);--glass-line:rgba(255,255,255,.85);--shadow:0 12px 32px rgba(58,38,66,.10);--bg:#F5EFF3;
+  --grad-a:#3A2A45;--grad-b:#9A6F8E;--grad-c:#B07A6E}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--glass:rgba(40,32,48,.62);--glass-line:rgba(255,255,255,.08);--shadow:0 12px 32px rgba(0,0,0,.35);--bg:#17121C;
+  --grad-a:#EFE8EE;--grad-b:#D9B8D0;--grad-c:#E7B7A8}}
+:root[data-theme="dark"]{--glass:rgba(40,32,48,.62);--glass-line:rgba(255,255,255,.08);--shadow:0 12px 32px rgba(0,0,0,.35);--bg:#17121C;
+  --grad-a:#EFE8EE;--grad-b:#D9B8D0;--grad-c:#E7B7A8}
+body{background:var(--bg);min-height:100vh;position:relative}
+body::before{content:"";position:fixed;inset:-10%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(38% 30% at 12% 8%, color-mix(in srgb,var(--c5) 45%,transparent), transparent 70%),
+    radial-gradient(34% 28% at 92% 18%, color-mix(in srgb,var(--c3) 42%,transparent), transparent 70%),
+    radial-gradient(40% 32% at 80% 78%, color-mix(in srgb,var(--c1) 36%,transparent), transparent 70%),
+    radial-gradient(36% 30% at 8% 88%, color-mix(in srgb,var(--c2) 38%,transparent), transparent 70%);
+  filter:blur(24px)}
+h1{background:linear-gradient(110deg,var(--grad-a) 10%,var(--grad-b) 60%,var(--grad-c));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600;font-size:2.6rem;padding-bottom:4px}
+.streak{display:inline-flex;align-items:center;gap:6px;margin:-8px 0 18px;padding:5px 12px;border-radius:999px;background:var(--glass);border:1px solid var(--glass-line);font-size:.85rem;font-weight:600;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.streak[hidden]{display:none}
+.capture,.panel,ul{background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3)}
+.picks{box-shadow:none}
+.add{background:linear-gradient(120deg,var(--grad-a),var(--grad-b));box-shadow:0 8px 20px color-mix(in srgb,var(--grad-b) 40%,transparent);transition:transform .12s}
+.add:active{transform:scale(.98)}
+.ghost{background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--shadow);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+
+/* colored chips at rest */
+.chip{background:rgba(255,255,255,.35)}
+.chip[style*="--c"]{background:color-mix(in srgb,var(--c) 16%,transparent);border-color:color-mix(in srgb,var(--c) 38%,transparent)}
+.chip[style*="--c"][aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 6px 14px color-mix(in srgb,var(--c) 40%,transparent)}
+.chip[aria-pressed="true"]:not([style*="--c"]){background:var(--ink);color:var(--paper)}
+
+/* pill tabs */
+.tabs{border-bottom:0;gap:8px;padding-bottom:6px}
+.tab{padding:8px 14px;border-radius:999px;margin:0;border:1px solid color-mix(in srgb,var(--c) 38%,transparent);background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--ink)}
+.tab .n{background:color-mix(in srgb,var(--c) 30%,transparent);border-radius:999px;padding:0 7px;min-width:20px;text-align:center}
+.tab .n:empty{display:none}
+.tab[aria-selected="true"]{background:var(--c);border-color:var(--c);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--c) 40%,transparent)}
+.tab[aria-selected="true"] .n{background:rgba(255,255,255,.28)}
+
+/* list */
+.box-head h2::before{width:14px;height:14px;box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 22%,transparent)}
+li{box-shadow:inset 4px 0 0 var(--c)}
+.check{border-color:var(--c);border-width:2px}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tagpill{font-size:.76rem;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--c) 15%,transparent);color:var(--ink)}
+.pick .boxname{display:inline-block;padding:1px 8px;border-radius:999px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--ink);margin-bottom:3px}
+
+/* celebration */
+.spark{position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:50}
+@media (prefers-reduced-motion: no-preference){
+  .check.pop{animation:pop .35s ease}
+  @keyframes pop{50%{transform:scale(1.3)}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Fancy Brain Dump</h1>
+  <p class="sub">Set it down here and get back to what you were doing.</p>
+  <div class="streak" id="streak" hidden></div>
+
+  <section class="capture" aria-label="Add a thought">
+    <textarea id="text" rows="2" placeholder="What just popped into your head?" aria-label="Thought"></textarea>
+    <div class="row"><div class="row-label">Box</div><div class="chips" id="boxChips"></div></div>
+    <div class="row"><div class="row-label">Time it needs</div><div class="chips" id="timeChips"></div></div>
+    <div class="row"><div class="row-label">Energy</div><div class="chips" id="energyChips"></div></div>
+    <div class="row"><div class="row-label">Where (pick any)</div><div class="chips" id="whereChips"></div></div>
+    <button class="add" id="add" disabled>Add it</button>
+    <div class="status" id="status" role="status"></div>
+  </section>
+
+  <div class="tools">
+    <button class="ghost" id="fitBtn">What fits right now?</button>
+    <button class="ghost" id="copyBtn">Copy for AI</button>
+  </div>
+  <section class="panel" id="fitPanel" hidden>
+    <h3>What fits right now?</h3>
+    <div class="row"><div class="row-label">Time I have</div><div class="chips" id="fTime"></div></div>
+    <div class="row"><div class="row-label">My energy</div><div class="chips" id="fEnergy"></div></div>
+    <div class="row"><div class="row-label">Where I am</div><div class="chips" id="fWhere"></div></div>
+    <button class="add" id="findBtn">Find my picks</button>
+    <div class="note" id="fitNote" role="status"></div>
+    <ul class="picks" id="picks" hidden></ul>
+  </section>
+  <section class="panel" id="copyPanel" hidden>
+    <h3>Copied for AI</h3>
+    <div class="note" id="copyNote"></div>
+    <textarea class="copybox" id="copyText" readonly></textarea>
+  </section>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <section id="box">
+    <div class="box-head"><h2 id="boxTitle"></h2><button class="toggle" id="toggleDone"></button></div>
+    <ul id="list"></ul>
+  </section>
+  <div class="footer"><button class="toggle" id="editBoxesLink">Edit boxes</button><button class="toggle" id="backupLink">Back up or restore</button></div>
+  <section class="panel" id="editPanel" hidden>
+    <h3>Edit boxes</h3>
+    <div class="note">Rename, recolor, reorder, or add boxes. A box has to be empty before you can remove it.</div>
+    <div id="boxEditor"></div>
+    <button class="toggle" id="addBox">Add a box</button>
+    <div class="tools" style="margin-top:12px"><button class="ghost" id="cancelBoxes">Cancel</button><button class="add" id="saveBoxesBtn" style="margin-top:0;flex:1">Save boxes</button></div>
+    <div class="note" id="editNote" role="status"></div>
+  </section>
+  <section class="panel" id="backupPanel" hidden>
+    <h3>Back up or restore</h3>
+    <div class="note">Back up copies all your thoughts as text to keep in Apple Notes. To restore, paste that text below and tap Restore.</div>
+    <textarea class="copybox" id="backupText" placeholder="Paste a backup here to restore"></textarea>
+    <div class="tools" style="margin-top:10px"><button class="ghost" id="backupBtn">Back up</button><button class="ghost" id="restoreBtn">Restore</button></div>
+    <div class="note" id="backupNote" role="status"></div>
+  </section>
+</div>
+
+<script>
+const COLORS=["c1","c2","c3","c4","c5","c6","c7","c8"];
+const DEFAULT_BOXES=[{id:"work",name:"Work",color:"c1"},{id:"home",name:"Home",color:"c4"},{id:"family",name:"Family",color:"c3"},{id:"errands",name:"Errands",color:"c2"},{id:"personal",name:"Personal",color:"c5"}];
+const LEGACY={bha:{name:"BHA",color:"c1"},yara:{name:"Yara",color:"c2"},kids:{name:"Kids",color:"c3"},home:{name:"Home",color:"c4"},personal:{name:"Personal",color:"c5"}};
+let BOXES=DEFAULT_BOXES.slice(),boxesLoaded=false;
+const cv=id=>{const b=BOXES.find(x=>x.id===id);return `var(--${b?b.color:"c8"})`};
+const TIMES=[{id:5,name:"5 min"},{id:15,name:"15 min"},{id:30,name:"30 min"},{id:60,name:"1 hr+"}];
+const ENERGY=[{id:"low",name:"Low"},{id:"medium",name:"Medium"},{id:"high",name:"High"}];
+const WHERE=[{id:"phone",name:"Phone"},{id:"computer",name:"Computer"},{id:"athome",name:"At home"},{id:"out",name:"Out and about"}];
+function whereNames(i){const w=Array.isArray(i.where)?i.where:(i.where?[i.where]:[]);return w.map(x=>name(WHERE,x)).filter(Boolean).join(" or ")}
+const LS_KEY="thought-inbox-items";
+
+function pref(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+const state={box:pref("ti-box")||"",tab:pref("ti-tab")||"",minutes:null,energy:null,where:[],showDone:false,openId:null,items:[]};
+let backend=null,saving=false;
+const $=id=>document.getElementById(id);
+
+/* Storage: claude.ai saves to the app's database; anywhere else (like GitHub Pages) saves on this device. */
+function localBackend(){
+  const read=()=>{try{return JSON.parse(localStorage.getItem(LS_KEY)||"[]")}catch(e){return []}};
+  const write=a=>{localStorage.setItem(LS_KEY,JSON.stringify(a));emit()};
+  let listener=null;const emit=()=>listener&&listener(read().sort((a,b)=>b.createdAt-a.createdAt));
+  return{
+    async loadBoxes(){try{return JSON.parse(localStorage.getItem("fbd-boxes")||"null")}catch(e){return null}},
+    async saveBoxes(list){localStorage.setItem("fbd-boxes",JSON.stringify(list))},
+    subscribe(fn){listener=fn;emit()},
+    async add(d){const a=read();a.push({...d,id:"t"+Date.now()+Math.random().toString(36).slice(2,6)});write(a)},
+    async update(id,patch){write(read().map(i=>i.id===id?{...i,...patch}:i))},
+    async remove(id){write(read().filter(i=>i.id!==id))}
+  };
+}
+function dbBackend(db){
+  const col=db.collection("thoughts");
+  return{
+    async loadBoxes(){const d=await db.doc("settings/boxes").get();return d.exists?d.data().list:null},
+    async saveBoxes(list){await db.doc("settings/boxes").set({list})},
+    subscribe(fn){col.orderBy("createdAt","desc").onSnapshot(s=>fn(s.docs.map(d=>({id:d.id,...d.data()}))),()=>setStatus("Syncing stopped. Reload to reconnect.",true))},
+    add:d=>col.add(d),
+    update:(id,p)=>col.doc(id).update(p),
+    remove:id=>col.doc(id).delete()
+  };
+}
+
+function chips(el,opts,get,set,colored){
+  el.innerHTML="";
+  opts.forEach(o=>{
+    const b=document.createElement("button");
+    b.className="chip";b.type="button";b.textContent=o.name;
+    if(colored)b.style.setProperty("--c",cv(o.id));
+    {const v=get();b.setAttribute("aria-pressed",String(Array.isArray(v)?v.includes(o.id):v===o.id));}
+    b.onclick=()=>set(o.id);
+    el.appendChild(b);
+  });
+}
+function renderCapture(){
+  chips($("boxChips"),BOXES,()=>state.box,v=>{state.box=v;pref("ti-box",v);renderCapture()},true);
+  const toggle=k=>v=>{state[k]=state[k]===v?null:v;renderCapture()};
+  chips($("timeChips"),TIMES,()=>state.minutes,toggle("minutes"));
+  chips($("energyChips"),ENERGY,()=>state.energy,toggle("energy"));
+  chips($("whereChips"),WHERE,()=>state.where,v=>{state.where=state.where.includes(v)?state.where.filter(x=>x!==v):[...state.where,v];renderCapture()});
+}
+function name(list,id){const f=list.find(x=>x.id===id);return f?f.name:null}
+
+function renderTabs(){
+  const t=$("tabs");t.innerHTML="";
+  BOXES.forEach(b=>{
+    const open=state.items.filter(i=>i.box===b.id&&!i.done).length;
+    const el=document.createElement("button");
+    el.className="tab";el.setAttribute("role","tab");
+    el.setAttribute("aria-selected",String(state.tab===b.id));
+    el.style.setProperty("--c",cv(b.id));
+    el.innerHTML=`${b.name}<span class="n">${open||""}</span>`;
+    el.onclick=()=>{state.tab=b.id;state.openId=null;pref("ti-tab",b.id);render()};
+    t.appendChild(el);
+  });
+}
+function renderList(){
+  const b=BOXES.find(x=>x.id===state.tab)||BOXES[0];
+  $("box").style.setProperty("--c",cv(b.id));
+  $("boxTitle").textContent=b.name;
+  const all=state.items.filter(i=>i.box===b.id);
+  const doneCount=all.filter(i=>i.done).length;
+  const shown=all.filter(i=>state.showDone||!i.done);
+  $("toggleDone").textContent=state.showDone?"Hide done":`Show done (${doneCount})`;
+  $("toggleDone").hidden=doneCount===0;
+  const ul=$("list");ul.innerHTML="";
+  if(!shown.length){const e=document.createElement("div");e.className="empty";e.textContent=`Nothing open in ${b.name} right now.`;ul.appendChild(e);return}
+  shown.forEach(i=>{
+    const li=document.createElement("li");if(i.done)li.className="done";
+    const main=document.createElement("div");main.className="main";
+    const c=document.createElement("button");c.className="check";
+    c.setAttribute("aria-label",i.done?"Mark not done":"Mark done");
+    c.textContent=i.done?"✓":"";c.onclick=()=>{if(!i.done)celebrate(c,i.box);change(i.id,{done:!i.done,doneAt:i.done?null:Date.now()})};
+    const body=document.createElement("div");body.className="body";
+    const tx=document.createElement("div");tx.className="text";tx.textContent=i.text;body.append(tx);
+    const tags=[name(TIMES,i.minutes),i.energy&&name(ENERGY,i.energy)+" energy",whereNames(i)].filter(Boolean);
+    if(tags.length){const tg=document.createElement("div");tg.className="tags";tags.forEach(t=>{const sp=document.createElement("span");sp.className="tagpill";sp.textContent=t;tg.append(sp)});body.append(tg)}
+    const m=document.createElement("button");m.className="more";m.textContent="⋯";
+    m.setAttribute("aria-label","Move or delete");m.setAttribute("aria-expanded",String(state.openId===i.id));
+    m.onclick=()=>{state.openId=state.openId===i.id?null:i.id;renderList()};
+    main.append(c,body,m);li.append(main);
+    if(state.openId===i.id){
+      const a=document.createElement("div");a.className="actions";
+      const lab=document.createElement("div");lab.className="row-label";lab.textContent="Move to";
+      const ch=document.createElement("div");ch.className="chips";
+      chips(ch,BOXES,()=>i.box,async v=>{if(v===i.box)return;state.openId=null;await change(i.id,{box:v});setStatus(`Moved to ${name(BOXES,v)}.`)},true);
+      const d=document.createElement("button");d.className="del";d.textContent="Delete this thought";
+      d.onclick=async()=>{if(confirm("Delete this thought?")){state.openId=null;try{await backend.remove(i.id)}catch(e){setStatus("Delete didn't go through. Try again.")}}};
+      a.append(lab,ch,d);li.append(a);
+    }
+    ul.appendChild(li);
+  });
+}
+
+const CHEERS=["Nice. One less thing to hold.","Look at you go.","Done and done.","Your brain says thank you.","That's momentum.","Checked off. Keep it rolling."];
+function celebrate(el,box){
+  setStatus(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
+  el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");
+  if(!window.matchMedia||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const r=el.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const colors=[cv(box),"var(--c5)","var(--c3)","var(--c7)"];
+  for(let k=0;k<14;k++){
+    const d=document.createElement("span");d.className="spark";d.style.background=colors[k%colors.length];
+    d.style.left=cx+"px";d.style.top=cy+"px";document.body.append(d);
+    const a=Math.random()*Math.PI*2,dist=28+Math.random()*34;
+    const anim=d.animate([{transform:"translate(-50%,-50%) scale(1)",opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*dist}px),calc(-50% + ${Math.sin(a)*dist}px)) scale(.3)`,opacity:0}],{duration:600+Math.random()*250,easing:"cubic-bezier(.2,.7,.3,1)"});
+    anim.onfinish=()=>d.remove();
+  }
+}
+function renderStreak(){
+  const start=new Date();start.setHours(0,0,0,0);
+  const n=state.items.filter(i=>i.done&&i.doneAt&&i.doneAt>=start.getTime()).length;
+  const el=$("streak");el.hidden=!n;el.textContent=`✨ ${n} done today`;
+}
+function render(){renderTabs();renderList();renderStreak()}
+function setStatus(s,stick){$("status").textContent=s;if(!stick)setTimeout(()=>{if($("status").textContent===s)$("status").textContent=""},2500)}
+async function change(id,patch){try{await backend.update(id,patch)}catch(e){setStatus("That change didn't save. Try again.")}}
+
+$("text").addEventListener("input",()=>{$("add").disabled=!$("text").value.trim()||!backend||saving});
+$("toggleDone").onclick=()=>{state.showDone=!state.showDone;renderList()};
+$("add").onclick=async()=>{
+  const text=$("text").value.trim();if(!text||!backend||saving)return;
+  saving=true;$("add").disabled=true;
+  const d={text,box:state.box,minutes:state.minutes,energy:state.energy,where:state.where.slice(),done:false,createdAt:Date.now()};
+  try{
+    await backend.add(d);
+    $("text").value="";state.minutes=state.energy=null;state.where=[];renderCapture();
+    state.tab=d.box;pref("ti-tab",d.box);render();setStatus(`Added to ${name(BOXES,d.box)}.`);
+  }catch(e){setStatus(e&&e.code==="quota_exceeded"?"Storage is full. Delete some done thoughts first.":"That didn't save. Tap Add again.")}
+  finally{saving=false;$("add").disabled=!$("text").value.trim()}
+};
+
+
+/* What fits right now */
+const fit={minutes:null,energy:null,where:null};let sampleFn=null,finding=false;
+function renderFit(){
+  const t=k=>v=>{fit[k]=fit[k]===v?null:v;renderFit()};
+  chips($("fTime"),TIMES,()=>fit.minutes,t("minutes"));
+  chips($("fEnergy"),ENERGY,()=>fit.energy,t("energy"));
+  chips($("fWhere"),WHERE,()=>fit.where,t("where"));
+}
+function openItems(){return state.items.filter(i=>!i.done)}
+$("fitBtn").onclick=()=>{$("editPanel").hidden=true;$("copyPanel").hidden=true;$("backupPanel").hidden=true;$("fitPanel").hidden=!$("fitPanel").hidden;renderFit()};
+
+function renderPicks(picks,more){
+  const ul=$("picks");ul.innerHTML="";
+  picks.forEach(p=>{
+    const li=document.createElement("li");li.className="pick";li.style.setProperty("--c",cv(p.item.box));
+    const main=document.createElement("div");main.className="main";
+    const c=document.createElement("button");c.className="check";c.setAttribute("aria-label","Mark done");
+    c.onclick=async()=>{celebrate(c,p.item.box);await change(p.item.id,{done:true,doneAt:Date.now()});li.classList.add("done");c.textContent="✓"};
+    const body=document.createElement("div");body.className="body";
+    body.innerHTML=`<div class="boxname"></div><div class="text"></div><div class="why"></div>`;
+    const tags=[name(TIMES,p.item.minutes),p.item.energy&&name(ENERGY,p.item.energy)+" energy",whereNames(p.item)].filter(Boolean).join(", ");
+    body.children[0].textContent=name(BOXES,p.item.box);body.children[1].textContent=p.item.text;body.children[2].textContent=p.why||tags;
+    main.append(c,body);li.append(main);ul.append(li);
+  });
+  if(more){
+    const li=document.createElement("li");const b=document.createElement("button");
+    b.className="toggle";b.textContent="Show 3 more";b.onclick=more;li.append(b);ul.append(li);
+  }
+  ul.hidden=false;
+}
+
+/* Filter without Claude: used anywhere Claude can't run inside the app */
+const ENERGY_RANK={low:1,medium:2,high:3};
+function localPicks(items){
+  return items.filter(i=>{
+    if(fit.minutes&&fit.minutes<60&&i.minutes&&i.minutes>fit.minutes)return false;
+    if(fit.energy&&i.energy&&ENERGY_RANK[i.energy]>ENERGY_RANK[fit.energy])return false;
+    const w=Array.isArray(i.where)?i.where:(i.where?[i.where]:[]);
+    if(fit.where&&w.length&&!w.includes(fit.where))return false;
+    return true;
+  }).map(i=>({item:i,score:(i.minutes?1:0)+(i.energy?1:0)+((Array.isArray(i.where)?i.where.length:i.where)?1:0)}))
+    .sort((a,b)=>b.score-a.score||a.item.createdAt-b.item.createdAt);
+}
+function showLocal(items){
+  const all=localPicks(items);let count=3;
+  if(!all.length){$("picks").hidden=true;$("fitNote").textContent="Nothing in your inbox fits that right now. Rest counts too.";return}
+  $("fitNote").textContent=`${all.length} ${all.length===1?"thought fits":"thoughts fit"}. Oldest ones show first.`;
+  const draw=()=>renderPicks(all.slice(0,count),all.length>count?()=>{count+=3;draw()}:null);
+  draw();
+}
+
+$("findBtn").onclick=async()=>{
+  if(finding)return;
+  const items=openItems();
+  if(!items.length){$("picks").hidden=true;$("fitNote").textContent="Your inbox has no open thoughts yet.";return}
+  if(!sampleFn){showLocal(items);return}
+  finding=true;$("findBtn").disabled=true;$("picks").hidden=true;$("fitNote").textContent="Looking through your boxes...";
+  const list=items.map(i=>({id:i.id,box:name(BOXES,i.box),text:i.text,minutes:i.minutes,energy:i.energy,where:whereNames(i)||null}));
+  const prompt=`You help a busy person pick tasks from her brain dump list.
+Right now she has: time ${fit.minutes?name(TIMES,fit.minutes):"not specified"}, energy ${fit.energy||"not specified"}, location ${fit.where?name(WHERE,fit.where):"not specified"}.
+Open thoughts (JSON): ${JSON.stringify(list)}
+Pick 1 to 3 thoughts that realistically fit her current time, energy, and location. The where field lists places the thought can be done. Missing tags mean unknown, so judge from the text. Favor things that are time sensitive or unblock other tasks. If nothing fits, return an empty list.
+Write each reason as one short, warm, plain sentence. Do not use em dashes.
+Reply with only JSON in this shape: {"picks":[{"id":"...","why":"..."}]}`;
+  try{
+    const r=await sampleFn.json(prompt,{modelTier:"quick"});
+    const picks=(r&&Array.isArray(r.picks)?r.picks:[]).map(p=>({...p,item:items.find(i=>i.id===p.id)})).filter(p=>p.item);
+    if(!picks.length){$("fitNote").textContent="Nothing in your inbox fits that right now. Rest counts too.";return}
+    $("fitNote").textContent="";renderPicks(picks);
+  }catch(e){
+    if(e&&e.code==="not_granted"){showLocal(items);$("fitNote").textContent="Claude access is off, so here are simple matches instead.";return}
+    const msg={rate_limited:"You've hit a usage limit for now. Try again a little later.",invalid_json:"Claude's answer came back jumbled. Tap Find my picks again."};
+    $("fitNote").textContent=msg[e&&e.code]||"Couldn't reach Claude just now. Tap Find my picks again.";
+  }finally{finding=false;$("findBtn").disabled=false}
+};
+
+async function copyOut(text,box){
+  box.value=text;let ok=false;
+  try{await navigator.clipboard.writeText(text);ok=true}catch(e){}
+  if(!ok){try{box.focus();box.select();box.setSelectionRange(0,text.length);ok=document.execCommand("copy")}catch(e){}}
+  return ok;
+}
+
+/* Copy for Claude */
+function buildCopy(){
+  const items=openItems();const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  let out=`Here's my Fancy Brain Dump as of ${today}. Please help me prioritize, break big items into doable steps, and tell me which ones should become Apple Reminders with a date or time.\n`;
+  BOXES.forEach(b=>{
+    const inBox=items.filter(i=>i.box===b.id);if(!inBox.length)return;
+    out+=`\n${b.name}\n`;
+    inBox.forEach((i,n)=>{
+      const tags=[name(TIMES,i.minutes),i.energy&&name(ENERGY,i.energy)+" energy",whereNames(i)].filter(Boolean);
+      out+=`${n+1}. ${i.text}${tags.length?" ("+tags.join(", ")+")":""}\n`;
+    });
+  });
+  if(!items.length)out+="\n(No open thoughts right now.)\n";
+  return out;
+}
+$("copyBtn").onclick=async()=>{
+  $("editPanel").hidden=true;$("fitPanel").hidden=true;$("backupPanel").hidden=true;$("copyPanel").hidden=false;
+  const ok=await copyOut(buildCopy(),$("copyText"));
+  $("copyNote").textContent=ok?"Copied. Open a chat with your AI assistant, like ChatGPT or Claude, and paste it in.":"Your phone blocked automatic copying. Press and hold the text below, tap Select All, then Copy.";
+};
+
+/* Back up and restore */
+$("backupLink").onclick=()=>{$("editPanel").hidden=true;$("fitPanel").hidden=true;$("copyPanel").hidden=true;$("backupPanel").hidden=!$("backupPanel").hidden;$("backupNote").textContent="";$("backupText").value=""};
+$("backupBtn").onclick=async()=>{
+  const data=JSON.stringify({app:"fancy-brain-dump",version:2,boxes:BOXES,savedAt:new Date().toISOString(),items:state.items.map(({id,...rest})=>rest)});
+  const ok=await copyOut(data,$("backupText"));
+  $("backupNote").textContent=ok?`Backup of ${state.items.length} thoughts copied. Paste it into a note in Apple Notes and keep it there.`:"Press and hold the text below, tap Select All, then Copy. Paste it into Apple Notes.";
+};
+$("restoreBtn").onclick=async()=>{
+  let parsed;
+  try{parsed=JSON.parse($("backupText").value.trim())}catch(e){$("backupNote").textContent="That doesn't look like a backup. Paste the whole backup text, starting with the curly bracket.";return}
+  const incoming=Array.isArray(parsed)?parsed:(parsed&&parsed.items);
+  if(!Array.isArray(incoming)){$("backupNote").textContent="That doesn't look like a backup. Paste the whole backup text, starting with the curly bracket.";return}
+  const fresh=!state.items.length&&BOXES.length===DEFAULT_BOXES.length&&BOXES.every((b,n)=>b.id===DEFAULT_BOXES[n].id&&b.name===DEFAULT_BOXES[n].name);
+  if(fresh)BOXES=[];
+  if(Array.isArray(parsed&&parsed.boxes))parsed.boxes.forEach(b=>{if(b&&b.id&&!BOXES.some(x=>x.id===b.id))BOXES.push({id:String(b.id),name:String(b.name||"Imported").slice(0,24),color:COLORS.includes(b.color)?b.color:"c8"})});
+  incoming.forEach(i=>{if(i&&i.box&&!BOXES.some(b=>b.id===i.box))BOXES.push({id:i.box,name:(LEGACY[i.box]||{}).name||"Imported",color:(LEGACY[i.box]||{}).color||"c8"})});
+  if(!BOXES.length)BOXES=DEFAULT_BOXES.slice();
+  fixSelection();await saveBoxes();render();renderCapture();
+  const seen=new Set(state.items.map(i=>i.text+"|"+i.createdAt));
+  let added=0;$("restoreBtn").disabled=true;$("backupNote").textContent="Restoring...";
+  for(const i of incoming){
+    if(!i||typeof i.text!=="string"||!i.box)continue;
+    const key=i.text+"|"+i.createdAt;if(seen.has(key))continue;
+    try{await backend.add({text:i.text,box:i.box,minutes:i.minutes??null,energy:i.energy??null,where:Array.isArray(i.where)?i.where:(i.where?[i.where]:[]),done:!!i.done,createdAt:i.createdAt||Date.now()});seen.add(key);added++}
+    catch(e){break}
+  }
+  $("restoreBtn").disabled=false;
+  $("backupNote").textContent=added?`Restored ${added} ${added===1?"thought":"thoughts"}. Anything already here was skipped.`:"Nothing new to restore. Those thoughts are already here.";
+  $("backupText").value="";
+};
+
+function fixSelection(){
+  if(!BOXES.some(b=>b.id===state.box))state.box=BOXES[0].id;
+  if(!BOXES.some(b=>b.id===state.tab))state.tab=BOXES[0].id;
+}
+async function saveBoxes(){try{await backend.saveBoxes(BOXES)}catch(e){setStatus("Box changes didn't save. Try again.")}}
+
+/* Edit boxes */
+let draft=[];
+function renderEditor(){
+  const wrap=$("boxEditor");wrap.innerHTML="";
+  draft.forEach((b,idx)=>{
+    const row=document.createElement("div");row.className="edit-row";
+    const top=document.createElement("div");top.className="edit-top";
+    const input=document.createElement("input");input.value=b.name;input.maxLength=24;input.setAttribute("aria-label","Box name");
+    input.oninput=()=>{b.name=input.value};
+    const up=document.createElement("button");up.className="mini";up.textContent="↑";up.setAttribute("aria-label","Move up");up.disabled=idx===0;
+    up.onclick=()=>{[draft[idx-1],draft[idx]]=[draft[idx],draft[idx-1]];renderEditor()};
+    const del=document.createElement("button");del.className="mini";del.textContent="Remove";
+    del.onclick=()=>{
+      const n=state.items.filter(i=>i.box===b.id).length;
+      if(n){$("editNote").textContent=`${b.name||"That box"} still has ${n} ${n===1?"thought":"thoughts"}. Move or delete them first.`;return}
+      if(draft.length===1){$("editNote").textContent="You need at least one box.";return}
+      draft.splice(idx,1);renderEditor();
+    };
+    top.append(input,up,del);
+    const sw=document.createElement("div");sw.className="swatches";
+    COLORS.forEach(c=>{const x=document.createElement("button");x.className="swatch";x.style.background=`var(--${c})`;
+      x.setAttribute("aria-label","Color "+c.slice(1));x.setAttribute("aria-pressed",String(b.color===c));
+      x.onclick=()=>{b.color=c;renderEditor()};sw.append(x)});
+    row.append(top,sw);wrap.append(row);
+  });
+  $("addBox").disabled=draft.length>=10;
+}
+$("editBoxesLink").onclick=()=>{
+  $("fitPanel").hidden=true;$("copyPanel").hidden=true;$("backupPanel").hidden=true;
+  const p=$("editPanel");p.hidden=!p.hidden;
+  if(!p.hidden){draft=BOXES.map(b=>({...b}));$("editNote").textContent="";renderEditor();p.scrollIntoView&&p.scrollIntoView({behavior:"smooth",block:"start"})}
+};
+$("addBox").onclick=()=>{
+  const used=draft.map(b=>b.color);const color=COLORS.find(c=>!used.includes(c))||"c8";
+  draft.push({id:"b"+Date.now().toString(36),name:"",color});renderEditor();
+  const inputs=$("boxEditor").querySelectorAll("input");inputs[inputs.length-1].focus();
+};
+$("cancelBoxes").onclick=()=>{$("editPanel").hidden=true};
+$("saveBoxesBtn").onclick=async()=>{
+  const clean=draft.map(b=>({...b,name:b.name.trim()}));
+  if(clean.some(b=>!b.name)){$("editNote").textContent="Every box needs a name.";return}
+  BOXES=clean;fixSelection();await saveBoxes();
+  $("editPanel").hidden=true;renderCapture();render();setStatus("Boxes saved.");
+};
+
+fixSelection();renderCapture();render();
+(async()=>{
+  let db=null;
+  if(window.claude&&window.claude.use){try{db=await window.claude.use("db")}catch(e){db=null}}
+  backend=db?dbBackend(db):localBackend();
+  let saved=null;try{saved=await backend.loadBoxes()}catch(e){}
+  let first=true;
+  backend.subscribe(async items=>{
+    state.items=items;
+    if(first){
+      first=false;
+      if(Array.isArray(saved)&&saved.length){BOXES=saved}
+      else{
+        const ids=[...new Set(items.map(i=>i.box))];
+        if(ids.length&&ids.every(id=>LEGACY[id])){BOXES=Object.keys(LEGACY).map(id=>({id,...LEGACY[id]}))}
+        else{BOXES=DEFAULT_BOXES.slice();ids.forEach(id=>{if(!BOXES.some(b=>b.id===id))BOXES.push({id,name:"Imported",color:"c8"})})}
+        saveBoxes();
+      }
+      fixSelection();renderCapture();
+    }
+    render();
+  });
+  $("add").disabled=!$("text").value.trim();
+  if(window.claude&&window.claude.use){
+    try{sampleFn=await window.claude.use("sample")}catch(e){sampleFn=null}
+  }
+})();
+</script>
+</body>
+</html>
