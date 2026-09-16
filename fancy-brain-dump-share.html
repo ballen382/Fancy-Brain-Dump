@@ -172,7 +172,7 @@ li{box-shadow:inset 4px 0 0 var(--c)}
     <h3>What fits right now?</h3>
     <div class="row"><div class="row-label">Time I have</div><div class="chips" id="fTime"></div></div>
     <div class="row"><div class="row-label">My energy</div><div class="chips" id="fEnergy"></div></div>
-    <div class="row"><div class="row-label">Where I am</div><div class="chips" id="fWhere"></div></div>
+    <div class="row"><div class="row-label">Where I can work (pick any)</div><div class="chips" id="fWhere"></div></div>
     <button class="add" id="findBtn">Find my picks</button>
     <div class="note" id="fitNote" role="status"></div>
     <ul class="picks" id="picks" hidden></ul>
@@ -371,12 +371,12 @@ $("add").onclick=async()=>{
 
 
 /* What fits right now */
-const fit={minutes:null,energy:null,where:null};let sampleFn=null,finding=false;
+const fit={minutes:null,energy:null,where:[]};let sampleFn=null,finding=false;
 function renderFit(){
   const t=k=>v=>{fit[k]=fit[k]===v?null:v;renderFit()};
   chips($("fTime"),TIMES,()=>fit.minutes,t("minutes"));
   chips($("fEnergy"),ENERGY,()=>fit.energy,t("energy"));
-  chips($("fWhere"),WHERE,()=>fit.where,t("where"));
+  chips($("fWhere"),WHERE,()=>fit.where,v=>{fit.where=fit.where.includes(v)?fit.where.filter(x=>x!==v):[...fit.where,v];renderFit()});
 }
 function openItems(){return state.items.filter(i=>!i.done)}
 $("fitBtn").onclick=()=>{$("editPanel").hidden=true;$("copyPanel").hidden=true;$("backupPanel").hidden=true;$("fitPanel").hidden=!$("fitPanel").hidden;renderFit()};
@@ -408,7 +408,7 @@ function localPicks(items){
     if(fit.minutes&&fit.minutes<60&&i.minutes&&i.minutes>fit.minutes)return false;
     if(fit.energy&&i.energy&&ENERGY_RANK[i.energy]>ENERGY_RANK[fit.energy])return false;
     const w=Array.isArray(i.where)?i.where:(i.where?[i.where]:[]);
-    if(fit.where&&w.length&&!w.includes(fit.where))return false;
+    if(fit.where.length&&w.length&&!w.some(x=>fit.where.includes(x)))return false;
     return true;
   }).map(i=>({item:i,score:(i.minutes?1:0)+(i.energy?1:0)+((Array.isArray(i.where)?i.where.length:i.where)?1:0)}))
     .sort((a,b)=>b.score-a.score||a.item.createdAt-b.item.createdAt);
@@ -429,7 +429,7 @@ $("findBtn").onclick=async()=>{
   finding=true;$("findBtn").disabled=true;$("picks").hidden=true;$("fitNote").textContent="Looking through your boxes...";
   const list=items.map(i=>({id:i.id,box:name(BOXES,i.box),text:i.text,minutes:i.minutes,energy:i.energy,where:whereNames(i)||null}));
   const prompt=`You help a busy person pick tasks from her brain dump list.
-Right now she has: time ${fit.minutes?name(TIMES,fit.minutes):"not specified"}, energy ${fit.energy||"not specified"}, location ${fit.where?name(WHERE,fit.where):"not specified"}.
+Right now she has: time ${fit.minutes?name(TIMES,fit.minutes):"not specified"}, energy ${fit.energy||"not specified"}, location ${fit.where.length?fit.where.map(x=>name(WHERE,x)).join(" or "):"not specified"}.
 Open thoughts (JSON): ${JSON.stringify(list)}
 Pick 1 to 3 thoughts that realistically fit her current time, energy, and location. The where field lists places the thought can be done. Missing tags mean unknown, so judge from the text. Favor things that are time sensitive or unblock other tasks. If nothing fits, return an empty list.
 Write each reason as one short, warm, plain sentence. Do not use em dashes.
@@ -489,7 +489,7 @@ $("restoreBtn").onclick=async()=>{
   const fresh=!state.items.length&&BOXES.length===DEFAULT_BOXES.length&&BOXES.every((b,n)=>b.id===DEFAULT_BOXES[n].id&&b.name===DEFAULT_BOXES[n].name);
   if(fresh)BOXES=[];
   if(Array.isArray(parsed&&parsed.boxes))parsed.boxes.forEach(b=>{if(b&&b.id&&!BOXES.some(x=>x.id===b.id))BOXES.push({id:String(b.id),name:String(b.name||"Imported").slice(0,24),color:COLORS.includes(b.color)?b.color:"c8"})});
-  incoming.forEach(i=>{if(i&&i.box&&!BOXES.some(b=>b.id===i.box))BOXES.push({id:i.box,name:(LEGACY[i.box]||{}).name||"Imported",color:(LEGACY[i.box]||{}).color||"c8"})});
+  incoming.forEach(i=>{if(i&&i.box&&!BOXES.some(b=>b.id===i.box)){const k=LEGACY[i.box]||DEFAULT_BOXES.find(d=>d.id===i.box)||{};BOXES.push({id:i.box,name:k.name||"Imported",color:k.color||"c8"})}});
   if(!BOXES.length)BOXES=DEFAULT_BOXES.slice();
   fixSelection();await saveBoxes();render();renderCapture();
   const seen=new Set(state.items.map(i=>i.text+"|"+i.createdAt));
